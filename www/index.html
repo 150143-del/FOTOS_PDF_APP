@@ -72,13 +72,64 @@
   .sheet{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}
   .sheet .r{display:flex;gap:3px}
   .sheet img{flex:1 1 0;min-width:0;height:auto;border-radius:3px;background:var(--panel)}
+
+  /* Iconos de los botones: en el celular se ve el texto, en el reloj solo el icono */
+  .ico{display:none}
+  .lbl-short{display:none}
+  .watch .lbl-long{display:none}
+  .watch .lbl-short{display:inline}
+  #ring{display:none}
+  #hint-watch{display:none}
+
+  /* ================= RELOJ REDONDO =================
+     Todo se mide en vmin (1% del lado menor de la pantalla) y se deja libre el borde,
+     porque las esquinas de una pantalla redonda no se ven. */
+  .watch body{font-size:clamp(11px,5.2vmin,24px)}
+  .watch #intro{display:none}
+  .watch h1{font-size:6.6vmin;text-align:center}
+  .watch #setup,.watch #done{max-width:none;padding:19vmin 15vmin 26vmin;gap:2.6vmin;justify-content:flex-start;text-align:center;align-items:stretch}
+  .watch label.t{font-size:3.3vmin;display:block;text-align:center}
+  .watch .row{gap:1.6vmin}
+  .watch .chip{min-width:0;padding:2.6vmin 1vmin;font-size:4.4vmin;border-radius:5vmin}
+  .watch .btn{min-height:11.5vmin;padding:2.4vmin 3vmin;font-size:4.6vmin;border-radius:7vmin}
+  .watch .err{font-size:3.5vmin;min-height:0}
+  .watch #resume{padding:2.6vmin;gap:1.6vmin;border-radius:6vmin}
+  .watch #resume b{font-size:4.2vmin}
+  .watch #thumbs{display:none}
+  .watch #head{flex-direction:column;gap:1.6vmin}
+  .watch #info{font-size:4.8vmin}
+  .watch .back{width:12vmin;height:12vmin;font-size:6vmin}
+
+  .watch #bar{display:none}
+  .watch #ring{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none}
+  .watch #ring circle{fill:none;stroke-width:1.8}
+  .watch #ringBg{stroke:#ffffff26}
+  .watch #ringC{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
+  .watch #hud{flex-direction:column;align-items:center;gap:.6vmin;padding:4.5vmin 0 0;text-align:center;background:linear-gradient(#000c,#0000 80%)}
+  .watch #hud .back{margin-bottom:1vmin}
+  .watch #hudText{flex:none;width:72vmin}
+  .watch #l1{font-size:4.4vmin}
+  .watch #l2{font-size:3.2vmin}
+  .watch #cd{font-size:3.8vmin}
+  .watch #undo{position:fixed;left:4vmin;top:50%;transform:translateY(-50%);padding:2vmin 2.6vmin;font-size:3.6vmin;border-radius:5vmin}
+  .watch #msg{left:17vmin;right:17vmin;bottom:28vmin;font-size:3.6vmin;padding:2vmin}
+  .watch #pause{padding:15vmin 14vmin;gap:1.6vmin}
+  .watch #pause b{font-size:6vmin}
+  .watch #pause span{font-size:3.8vmin}
+  .watch #hint-watch{display:block;font-size:3.2vmin;color:#ffffffaa;margin-top:1.5vmin}
+  .watch #controls{position:absolute;left:0;right:0;bottom:8.5vmin;z-index:3;display:flex;justify-content:center;gap:2.2vmin;padding:0;background:none}
+  .watch #controls .btn{width:14.5vmin;height:14.5vmin;min-height:0;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3.7vmin;grid-column:auto}
+  .watch #controls .btn.alt{background:#000c;border:1.5px solid #ffffff99}
+  .watch #controls .lbl{display:none}
+  .watch #controls .ico{display:block;width:7vmin;height:7vmin}
+  .watch #controls #gen .ico{width:auto;height:auto;font-weight:800}
 </style>
 </head>
 <body>
 
 <section id="setup" class="screen on">
   <h1>Fotos a PDF</h1>
-  <p>Toma fotos solas cada pocos segundos. Las fotos de una hoja se arman en una sola página del PDF.</p>
+  <p id="intro">Toma fotos solas cada pocos segundos. Las fotos de una hoja se arman en una sola página del PDF.</p>
   <div id="resume" hidden>
     <b id="resInfo"></b>
     <button class="btn" id="resGo" type="button">Continuar sesión</button>
@@ -94,7 +145,7 @@
     </div>
   </div>
   <div>
-    <label class="t">Fotos por fila (después baja a la siguiente)</label>
+    <label class="t">Fotos por fila</label>
     <div class="row" id="perrow" style="margin-top:8px">
       <button class="chip" data-n="0" aria-pressed="true">Yo decido</button>
       <button class="chip" data-n="2" aria-pressed="false">2</button>
@@ -109,6 +160,14 @@
       <button class="chip" data-f="user" aria-pressed="false">Frontal</button>
     </div>
   </div>
+  <div>
+    <label class="t">Diseño de pantalla</label>
+    <div class="row" id="layout" style="margin-top:8px">
+      <button class="chip" data-l="auto" aria-pressed="true">Auto</button>
+      <button class="chip" data-l="watch" aria-pressed="false">Reloj</button>
+      <button class="chip" data-l="phone" aria-pressed="false">Celular</button>
+    </div>
+  </div>
   <button class="btn" id="start" type="button">Empezar</button>
   <div class="err" id="err" role="alert"></div>
 </section>
@@ -120,16 +179,17 @@
     <div id="hud">
       <button class="back" id="back1" type="button" aria-label="Volver al menú">&larr;</button>
       <div id="hudText"><div id="l1"><span id="rec"></span><span id="l1t"></span></div><div id="l2"></div><div id="cd"></div></div>
-      <button id="undo" type="button">Borrar última</button>
+      <button id="undo" type="button" aria-label="Borrar última foto"><span class="lbl-long">Borrar última</span><span class="lbl-short">Borrar</span></button>
     </div>
     <div id="bar"></div>
+    <svg id="ring" viewBox="0 0 100 100" aria-hidden="true"><circle id="ringBg" cx="50" cy="50" r="48.2"/><circle id="ringC" cx="50" cy="50" r="48.2"/></svg>
     <div id="msg" hidden></div>
-    <div id="pause" hidden role="button" tabindex="0"><b id="pTitle"></b><span id="pSub"></span></div>
+    <div id="pause" hidden role="button" tabindex="0"><b id="pTitle"></b><span id="pSub"></span><span id="hint-watch">Botones de abajo: fila nueva · hoja lista · PDF</span></div>
   </div>
   <div id="controls">
-    <button class="btn alt" id="rowDone" type="button">Nueva fila &darr;</button>
-    <button class="btn alt" id="sheetDone" type="button">Página completada</button>
-    <button class="btn" id="gen" type="button">Generar PDF</button>
+    <button class="btn alt" id="rowDone" type="button" aria-label="Nueva fila"><span class="lbl">Nueva fila &darr;</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button>
+    <button class="btn alt" id="sheetDone" type="button" aria-label="Página completada"><span class="lbl">Página completada</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></button>
+    <button class="btn" id="gen" type="button" aria-label="Generar PDF"><span class="lbl">Generar PDF</span><span class="ico">PDF</span></button>
   </div>
 </section>
 
@@ -141,7 +201,7 @@
   <div id="prog" class="err" style="color:var(--muted)"></div>
   <button class="btn" id="dl" type="button">Descargar PDF</button>
   <button class="btn alt" id="share" type="button" hidden>Compartir PDF</button>
-  <button class="btn alt" id="zip" type="button">Descargar fotos sueltas (ZIP)</button>
+  <button class="btn alt" id="zip" type="button">Fotos sueltas (ZIP)</button>
   <button class="btn alt" id="more" type="button">Seguir tomando fotos</button>
   <button class="btn alt" id="again" type="button">Nueva sesión</button>
   <div class="err" id="err2" role="alert"></div>
@@ -267,6 +327,27 @@ function buildZip(files){
   let encodeQueue = Promise.resolve();
   let pdfBlob = null, renderId = 0;
   let confirmStart = false, confirmDel = false, confirmNew = false;
+  let isWatch = false, layoutPref = "auto";
+  const RING = 2 * Math.PI * 48.2;
+
+  // ---- Diseño: reloj redondo o celular ----
+  try { layoutPref = localStorage.getItem("fotospdf-layout") || "auto"; } catch (e) {}
+  try { const q = new URLSearchParams(location.search).get("reloj"); if (q === "1") layoutPref = "watch"; if (q === "0") layoutPref = "phone"; } catch (e) {}
+  function applyLayout(){
+    const w = window.innerWidth, h = window.innerHeight;
+    const auto = Math.abs(w / h - 1) < 0.15 && Math.max(w, h) <= 640;   // pantalla casi cuadrada y chica
+    isWatch = layoutPref === "watch" || (layoutPref === "auto" && auto);
+    document.documentElement.classList.toggle("watch", isWatch);
+    [...$("layout").children].forEach(c => c.setAttribute("aria-pressed", c.dataset.l === layoutPref ? "true" : "false"));
+  }
+  $("layout").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    layoutPref = b.dataset.l;
+    try { localStorage.setItem("fotospdf-layout", layoutPref); } catch (er) {}
+    applyLayout();
+  });
+  window.addEventListener("resize", applyLayout);
+  applyLayout();
 
   const show = (k) => { for (const s in screens) screens[s].classList.toggle("on", s === k); };
   function pushScreen(){ if (!(history.state && history.state.s === "in")) history.pushState({ s: "in" }, ""); }
@@ -303,12 +384,15 @@ function buildZip(files){
   // ---- Reloj de captura: sigue la hora real, así que guardar la foto no retrasa la siguiente ----
   function runBar(ms){
     const b = $("bar"); b.style.transition = "none"; b.style.width = "0";
-    void b.offsetWidth;
+    const r = $("ringC"); r.style.strokeDasharray = RING; r.style.transition = "none"; r.style.strokeDashoffset = RING;
+    void b.offsetWidth; void r.getBoundingClientRect();
     b.style.transition = "width " + ms + "ms linear"; b.style.width = "100%";
+    r.style.transition = "stroke-dashoffset " + ms + "ms linear"; r.style.strokeDashoffset = 0;
   }
   function stopTimers(){
     runId++; clearInterval(cdTimer); cdTimer = null;
     const b = $("bar"); b.style.transition = "none"; b.style.width = "0";
+    const r = $("ringC"); r.style.strokeDasharray = RING; r.style.transition = "none"; r.style.strokeDashoffset = RING;
   }
   function tick(id){
     const d = Math.max(0, nextAt - performance.now());
@@ -328,7 +412,7 @@ function buildZip(files){
     nextAt = performance.now() + first; hud(); runBar(first);
     cdTimer = setInterval(() => {
       const s = Math.max(0, Math.ceil((nextAt - performance.now()) / 1000));
-      $("cd").textContent = "Próxima foto en " + s + " s";
+      $("cd").textContent = (isWatch ? "Foto en " : "Próxima foto en ") + s + " s";
     }, 200);
     tick(id);
   }
@@ -336,7 +420,7 @@ function buildZip(files){
   function capture(){
     const v = $("v");
     if (!v.videoWidth || v.readyState < 2){ say("La cámara todavía no entrega imagen"); return; }
-    const k = Math.min(1, 1800 / Math.max(v.videoWidth, v.videoHeight));
+    const k = Math.min(1, (isWatch ? 1600 : 1800) / Math.max(v.videoWidth, v.videoHeight));
     const W = Math.round(v.videoWidth * k), H = Math.round(v.videoHeight * k);
     const c = document.createElement("canvas"); c.width = W; c.height = H;
     c.getContext("2d").drawImage(v, 0, 0, W, H);          // instantáneo: aquí se toma la foto
@@ -364,7 +448,7 @@ function buildZip(files){
     }
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false
+        video: { facingMode: { ideal: facing }, width: { ideal: isWatch ? 1280 : 1920 }, height: { ideal: isWatch ? 720 : 1080 } }, audio: false
       });
     } catch (e) { return "No se pudo abrir la cámara. Revisa el permiso de cámara de la app."; }
     try { // enfoque continuo, si el celular lo permite
@@ -511,8 +595,18 @@ function buildZip(files){
   async function nativeSave(blob, name){
     const P = window.Capacitor.Plugins;
     const data = await blobToBase64(blob);
-    const w = await P.Filesystem.writeFile({ path: name, data: data, directory: "CACHE" });
-    await P.Share.share({ title: name, dialogTitle: "Guardar o enviar", files: [w.uri] });
+    let canShare = true;
+    try { const c = await P.Share.canShare(); canShare = !!(c && c.value); } catch (e) {}
+    if (canShare){
+      try {
+        const w = await P.Filesystem.writeFile({ path: name, data: data, directory: "CACHE" });
+        await P.Share.share({ title: name, dialogTitle: "Guardar o enviar", files: [w.uri] });
+        return;
+      } catch (e) { if (/cancel/i.test(String((e && e.message) || e))) return; }
+    }
+    // Sin menú de compartir (pasa en algunos relojes): se guarda en la memoria de la app.
+    await P.Filesystem.writeFile({ path: name, data: data, directory: "EXTERNAL", recursive: true });
+    $("prog").textContent = "Guardado en la memoria: Android/data/com.mar.fotospdf/files/" + name;
   }
   async function deliver(blob, name){
     $("err2").textContent = "";
