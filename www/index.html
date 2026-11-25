@@ -32,46 +32,59 @@
   .btn{padding:15px 10px;border-radius:14px;border:0;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;
     background:var(--accent);color:var(--accent-fg);width:100%}
   .btn.alt{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
-  .btn:focus-visible,.chip:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  .btn:disabled{opacity:.5}
+  .btn:focus-visible,.chip:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:2px}
   .err{color:var(--danger);min-height:1.4em}
+  .back{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid #ffffff55;background:#000a;color:#fff;
+    font-size:1.5rem;line-height:1;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center}
 
-  #setup,#done{padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));gap:16px;max-width:480px;margin:0 auto;width:100%}
+  #setup,#done{padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));gap:16px;max-width:480px;margin:0 auto;width:100%;overflow:auto}
   #setup{justify-content:center}
-  #done{overflow:auto}
+  #resume{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  #resume b{font-size:1.05rem}
 
   #cap{background:#000}
   #stage{position:relative;flex:1;min-height:0;overflow:hidden}
   video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .25s}
   #flash.go{opacity:.75;transition:none}
-  #hud{position:absolute;left:0;right:0;top:0;padding:max(12px,env(safe-area-inset-top)) 14px 22px;
-    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
-    background:linear-gradient(#000b,#0000);pointer-events:none}
-  #sheetinfo{font-size:1.25rem;font-weight:800;font-variant-numeric:tabular-nums}
-  #total{color:#ffffffbb;font-variant-numeric:tabular-nums}
-  #undo{pointer-events:auto;border:1px solid #ffffff66;background:#0008;color:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
-  #undo:disabled{opacity:.4}
-  #bar{position:absolute;left:0;bottom:0;height:5px;background:var(--accent);width:0}
-  #msg{position:absolute;left:16px;right:16px;bottom:18px;text-align:center;font-weight:600;background:#000c;padding:10px;border-radius:10px;pointer-events:none}
-  #pause{position:absolute;inset:0;background:#000b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;cursor:pointer}
-  #pause b{font-size:1.5rem}
-  #pause span{color:#ffffffcc}
+  #hud{position:absolute;left:0;right:0;top:0;z-index:3;padding:max(10px,env(safe-area-inset-top)) 12px 22px;
+    display:flex;align-items:flex-start;gap:10px;background:linear-gradient(#000b,#0000);pointer-events:none}
+  #hudText{flex:1;min-width:0}
+  #l1{font-size:1.2rem;font-weight:800}
+  #l2{color:#ffffffcc;font-size:.85rem;font-variant-numeric:tabular-nums}
+  #cd{color:var(--accent);font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums}
   #rec{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--danger);margin-right:8px;animation:p 1s infinite}
   @keyframes p{50%{opacity:.25}}
   @media (prefers-reduced-motion:reduce){#rec{animation:none}}
+  #undo{pointer-events:auto;border:1px solid #ffffff66;background:#0008;color:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
+  #undo:disabled{opacity:.4}
+  #bar{position:absolute;left:0;bottom:0;height:5px;background:var(--accent);width:0;z-index:3}
+  #msg{position:absolute;left:16px;right:16px;bottom:18px;z-index:3;text-align:center;font-weight:600;background:#000c;padding:10px;border-radius:10px;pointer-events:none}
+  #pause{position:absolute;inset:0;z-index:2;background:#000b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;cursor:pointer}
+  #pause b{font-size:1.5rem}
+  #pause span{color:#ffffffcc}
   #controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px max(14px,env(safe-area-inset-left)) max(14px,env(safe-area-inset-bottom));background:#000}
+  #controls #gen{grid-column:1/-1}
 
-  #thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
-  #thumbs img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--panel)}
-  #thumbs h2{grid-column:1/-1}
-  #info{font-weight:700;font-size:1.2rem}
+  #head{display:flex;align-items:center;gap:12px}
+  #info{font-weight:700;font-size:1.15rem}
+  .sheet{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}
+  .sheet .r{display:flex;gap:3px}
+  .sheet img{flex:1 1 0;min-width:0;height:auto;border-radius:3px;background:var(--panel)}
 </style>
 </head>
 <body>
 
 <section id="setup" class="screen on">
   <h1>Fotos a PDF</h1>
-  <p>Toma fotos solas cada pocos segundos. Cuando termines una hoja, toca "Página completada". Al final, "Generar PDF".</p>
+  <p>Toma fotos solas cada pocos segundos. Las fotos de una hoja se arman en una sola página del PDF.</p>
+  <div id="resume" hidden>
+    <b id="resInfo"></b>
+    <button class="btn" id="resGo" type="button">Continuar sesión</button>
+    <button class="btn alt" id="resPdf" type="button">Generar PDF</button>
+    <button class="btn alt" id="resDel" type="button">Descartar fotos</button>
+  </div>
   <div>
     <label class="t">Una foto cada</label>
     <div class="row" id="intervals" style="margin-top:8px">
@@ -81,13 +94,22 @@
     </div>
   </div>
   <div>
+    <label class="t">Fotos por fila (después baja a la siguiente)</label>
+    <div class="row" id="perrow" style="margin-top:8px">
+      <button class="chip" data-n="0" aria-pressed="true">Yo decido</button>
+      <button class="chip" data-n="2" aria-pressed="false">2</button>
+      <button class="chip" data-n="3" aria-pressed="false">3</button>
+      <button class="chip" data-n="4" aria-pressed="false">4</button>
+    </div>
+  </div>
+  <div>
     <label class="t">Cámara</label>
     <div class="row" id="faces" style="margin-top:8px">
       <button class="chip" data-f="environment" aria-pressed="true">Trasera</button>
       <button class="chip" data-f="user" aria-pressed="false">Frontal</button>
     </div>
   </div>
-  <button class="btn" id="start">Empezar</button>
+  <button class="btn" id="start" type="button">Empezar</button>
   <div class="err" id="err" role="alert"></div>
 </section>
 
@@ -96,7 +118,8 @@
     <video id="v" playsinline muted autoplay></video>
     <div id="flash"></div>
     <div id="hud">
-      <div><div id="sheetinfo"><span id="rec"></span>Hoja 1 · 0 fotos</div><div id="total">Total 0</div></div>
+      <button class="back" id="back1" type="button" aria-label="Volver al menú">&larr;</button>
+      <div id="hudText"><div id="l1"><span id="rec"></span><span id="l1t"></span></div><div id="l2"></div><div id="cd"></div></div>
       <button id="undo" type="button">Borrar última</button>
     </div>
     <div id="bar"></div>
@@ -104,13 +127,18 @@
     <div id="pause" hidden role="button" tabindex="0"><b id="pTitle"></b><span id="pSub"></span></div>
   </div>
   <div id="controls">
+    <button class="btn alt" id="rowDone" type="button">Nueva fila &darr;</button>
     <button class="btn alt" id="sheetDone" type="button">Página completada</button>
     <button class="btn" id="gen" type="button">Generar PDF</button>
   </div>
 </section>
 
 <section id="done" class="screen">
-  <div id="info">Listo</div>
+  <div id="head">
+    <button class="back" id="back2" type="button" aria-label="Volver al menú">&larr;</button>
+    <div id="info">Listo</div>
+  </div>
+  <div id="prog" class="err" style="color:var(--muted)"></div>
   <button class="btn" id="dl" type="button">Descargar PDF</button>
   <button class="btn alt" id="share" type="button" hidden>Compartir PDF</button>
   <button class="btn alt" id="zip" type="button">Descargar fotos sueltas (ZIP)</button>
@@ -122,42 +150,65 @@
 
 <script>
 // LIB-START
-// PDF sin librerías: una foto JPEG por página, con una franja arriba con la etiqueta (solo ASCII).
-function buildPdf(images){
+// Reparte las fotos de UNA hoja en una página: cada fila va de izquierda a derecha y las filas bajan.
+// rows: lista de filas; cada fila es una lista de fotos {w,h}. Elige página vertical u horizontal (A4) según cuál deja las fotos más grandes.
+function layoutSheet(rows){
+  const M = 20, LBL = 18, G = 4;
+  let best = null;
+  [[595, 842], [842, 595]].forEach(([W, H]) => {
+    const aw = W - 2 * M, ah = H - 2 * M - LBL;
+    const hs = rows.map(r => (aw - G * (r.length - 1)) / r.reduce((a, s) => a + s.w / s.h, 0));
+    const f = Math.min(1, (ah - G * (rows.length - 1)) / hs.reduce((a, b) => a + b, 0));
+    if (!best || aw * f > best.size + 0.01) best = { W, H, aw, hs, f, size: aw * f };
+  });
+  const items = []; let y = M + LBL;
+  rows.forEach((r, ri) => {
+    const rh = best.hs[ri] * best.f;
+    const ws = r.map(s => (s.w / s.h) * rh);
+    const rowW = ws.reduce((a, b) => a + b, 0) + G * (r.length - 1);
+    let x = M + (best.aw - rowW) / 2;
+    r.forEach((s, i) => { items.push({ shot: s, x: x, y: y, dw: ws[i], dh: rh }); x += ws[i] + G; });
+    y += rh + G;
+  });
+  return { W: best.W, H: best.H, items: items };
+}
+
+// PDF sin librerías: una página por hoja; las fotos van como JPEG tal cual.
+// pages: [{W,H,label,items:[{shot:{bytes,w,h},x,y,dw,dh}]}] con x,y desde la esquina superior izquierda.
+function buildPdf(pages){
   const enc = new TextEncoder();
-  const parts = []; const offsets = []; let pos = 0;
+  const parts = []; const off = []; let pos = 0;
   const push = (u8) => { parts.push(u8); pos += u8.length; };
   const str = (s) => push(enc.encode(s));
   const esc = (s) => String(s).replace(/[^\x20-\x7E]/g, "?").replace(/([\\()])/g, "\\$1");
-  const n = images.length, HEAD = 26;
-  const total = 3 + 3 * n;
+  let next = 4;
+  const meta = pages.map(p => { const imgIds = p.items.map(() => next++); const co = next++; const po = next++; return { imgIds, co, po }; });
+  const total = next - 1;
   str("%PDF-1.4\n");
-  offsets[1] = pos;
-  str("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
-  offsets[2] = pos;
-  const kids = images.map((_, i) => (6 + 3 * i) + " 0 R").join(" ");
-  str("2 0 obj\n<< /Type /Pages /Kids [" + kids + "] /Count " + n + " >>\nendobj\n");
-  offsets[3] = pos;
-  str("3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n");
-  images.forEach((im, i) => {
-    const k = Math.min(1, 842 / Math.max(im.w, im.h));
-    const W = +(im.w * k).toFixed(2), H = +(im.h * k).toFixed(2), PH = +(H + HEAD).toFixed(2);
-    const io = 4 + 3 * i, co = 5 + 3 * i, po = 6 + 3 * i;
-    offsets[io] = pos;
-    str(io + " 0 obj\n<< /Type /XObject /Subtype /Image /Width " + im.w + " /Height " + im.h +
-        " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + im.bytes.length + " >>\nstream\n");
-    push(im.bytes);
-    str("\nendstream\nendobj\n");
-    const content = "q " + W + " 0 0 " + H + " 0 0 cm /Im0 Do Q\nBT /F1 12 Tf 12 " + (PH - 18).toFixed(2) + " Td (" + esc(im.label || "") + ") Tj ET";
-    offsets[co] = pos;
-    str(co + " 0 obj\n<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream\nendobj\n");
-    offsets[po] = pos;
-    str(po + " 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + PH +
-        "] /Resources << /Font << /F1 3 0 R >> /XObject << /Im0 " + io + " 0 R >> >> /Contents " + co + " 0 R >>\nendobj\n");
+  off[1] = pos; str("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  off[2] = pos; str("2 0 obj\n<< /Type /Pages /Kids [" + meta.map(m => m.po + " 0 R").join(" ") + "] /Count " + pages.length + " >>\nendobj\n");
+  off[3] = pos; str("3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n");
+  pages.forEach((p, i) => {
+    const m = meta[i];
+    p.items.forEach((it, j) => {
+      const id = m.imgIds[j]; off[id] = pos;
+      str(id + " 0 obj\n<< /Type /XObject /Subtype /Image /Width " + it.shot.w + " /Height " + it.shot.h +
+          " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + it.shot.bytes.length + " >>\nstream\n");
+      push(it.shot.bytes); str("\nendstream\nendobj\n");
+    });
+    let c = "BT /F1 10 Tf 20 " + (p.H - 32).toFixed(2) + " Td (" + esc(p.label) + ") Tj ET\n";
+    p.items.forEach((it, j) => {
+      c += "q " + it.dw.toFixed(2) + " 0 0 " + it.dh.toFixed(2) + " " + it.x.toFixed(2) + " " + (p.H - it.y - it.dh).toFixed(2) + " cm /Im" + j + " Do Q\n";
+    });
+    off[m.co] = pos; str(m.co + " 0 obj\n<< /Length " + c.length + " >>\nstream\n" + c + "endstream\nendobj\n");
+    const xo = p.items.map((_, j) => "/Im" + j + " " + m.imgIds[j] + " 0 R").join(" ");
+    off[m.po] = pos;
+    str(m.po + " 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + p.W + " " + p.H +
+        "] /Resources << /Font << /F1 3 0 R >> /XObject << " + xo + " >> >> /Contents " + m.co + " 0 R >>\nendobj\n");
   });
   const xref = pos;
   let x = "xref\n0 " + (total + 1) + "\n0000000000 65535 f \n";
-  for (let i = 1; i <= total; i++) x += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  for (let i = 1; i <= total; i++) x += String(off[i]).padStart(10, "0") + " 00000 n \n";
   x += "trailer\n<< /Size " + (total + 1) + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n";
   str(x);
   return new Blob(parts, { type: "application/pdf" });
@@ -206,14 +257,19 @@ function buildZip(files){
 (function(){
   const $ = (id) => document.getElementById(id);
   const screens = { setup: $("setup"), cap: $("cap"), done: $("done") };
-  const show = (k) => { for (const s in screens) screens[s].classList.toggle("on", s === k); };
   const pad = (n) => String(n).padStart(2, "0");
+  const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
-  let seconds = 2, facing = "environment";
-  let stream = null, timer = null, firstTimer = null, wake = null, msgTimer = null;
-  let shots = [];              // {bytes,w,h,url,sheet}
-  let sheet = 1, paused = false, busy = false, startedAt = 0;
-  let pdfBlob = null, pdfUrl = null, confirmNew = false;
+  let seconds = 2, facing = "environment", perRow = 0;
+  let stream = null, runId = 0, wake = null, msgTimer = null, cdTimer = null, nextAt = 0;
+  let shots = [];              // {sheet,row,w,h,bytes,url,dead}
+  let sheet = 1, row = 0, paused = true;
+  let encodeQueue = Promise.resolve();
+  let pdfBlob = null, renderId = 0;
+  let confirmStart = false, confirmDel = false, confirmNew = false;
+
+  const show = (k) => { for (const s in screens) screens[s].classList.toggle("on", s === k); };
+  function pushScreen(){ if (!(history.state && history.state.s === "in")) history.pushState({ s: "in" }, ""); }
 
   function pick(groupId, attr, cb){
     $(groupId).addEventListener("click", (e) => {
@@ -224,14 +280,16 @@ function buildZip(files){
   }
   pick("intervals", "s", v => seconds = +v);
   pick("faces", "f", v => facing = v);
+  pick("perrow", "n", v => perRow = +v);
 
-  const inSheet = () => shots.filter(s => s.sheet === sheet).length;
+  const count = (f) => shots.filter(f).length;
   function hud(){
-    const n = inSheet();
-    $("sheetinfo").innerHTML = '<span id="rec"></span>Hoja ' + sheet + " · " + n + (n === 1 ? " foto" : " fotos");
-    $("total").textContent = "Total " + shots.length;
-    $("undo").disabled = n === 0;
+    const nRow = count(s => s.sheet === sheet && s.row === row), nSheet = count(s => s.sheet === sheet);
+    $("l1t").textContent = "Hoja " + sheet + " · Fila " + (row + 1);
+    $("l2").textContent = "Fila: " + nRow + " · Hoja: " + nSheet + " · Total: " + shots.length;
+    $("undo").disabled = nSheet === 0;
     $("rec").style.display = paused ? "none" : "inline-block";
+    if (paused) $("cd").textContent = "En pausa";
   }
   function say(t){
     const m = $("msg"); m.textContent = t; m.hidden = false;
@@ -242,38 +300,62 @@ function buildZip(files){
     $("pTitle").textContent = title; $("pSub").textContent = sub; $("pause").hidden = false; hud();
   }
 
-  async function takeShot(){
-    const v = $("v");
-    if (paused || !v.videoWidth || busy) return;
-    busy = true;
-    try {
-      const max = 1800, k = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
-      const c = document.createElement("canvas");
-      c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
-      c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
-      const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.82));
-      if (!blob || paused) return;
-      const bytes = new Uint8Array(await blob.arrayBuffer());
-      shots.push({ bytes, w: c.width, h: c.height, url: URL.createObjectURL(blob), sheet });
-      hud();
-      const f = $("flash"); f.classList.add("go");
-      requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove("go")));
-    } finally { busy = false; }
-  }
-
-  function runBar(){
+  // ---- Reloj de captura: sigue la hora real, así que guardar la foto no retrasa la siguiente ----
+  function runBar(ms){
     const b = $("bar"); b.style.transition = "none"; b.style.width = "0";
     void b.offsetWidth;
-    b.style.transition = "width " + seconds + "s linear"; b.style.width = "100%";
+    b.style.transition = "width " + ms + "ms linear"; b.style.width = "100%";
   }
   function stopTimers(){
-    clearInterval(timer); timer = null; clearTimeout(firstTimer); firstTimer = null;
+    runId++; clearInterval(cdTimer); cdTimer = null;
     const b = $("bar"); b.style.transition = "none"; b.style.width = "0";
   }
-  function beginCapturing(){
-    stopTimers(); paused = false; $("pause").hidden = true; startedAt = Date.now(); hud();
-    // La primera foto sale a los 1,2 s para dar tiempo a enfocar; luego una cada N segundos.
-    firstTimer = setTimeout(async () => { await takeShot(); if (!paused){ timer = setInterval(takeShot, seconds * 1000); runBar(); } }, 1200);
+  function tick(id){
+    const d = Math.max(0, nextAt - performance.now());
+    setTimeout(() => {
+      if (id !== runId) return;
+      capture();
+      nextAt += seconds * 1000;
+      const now = performance.now();
+      if (nextAt < now + 200) nextAt = now + seconds * 1000; // si el celular se atrasó, no acumular
+      runBar(nextAt - now);
+      tick(id);
+    }, d);
+  }
+  function startLoop(){
+    stopTimers(); paused = false; $("pause").hidden = true;
+    const id = runId, first = 1200; // un momento para que la cámara enfoque
+    nextAt = performance.now() + first; hud(); runBar(first);
+    cdTimer = setInterval(() => {
+      const s = Math.max(0, Math.ceil((nextAt - performance.now()) / 1000));
+      $("cd").textContent = "Próxima foto en " + s + " s";
+    }, 200);
+    tick(id);
+  }
+
+  function capture(){
+    const v = $("v");
+    if (!v.videoWidth || v.readyState < 2){ say("La cámara todavía no entrega imagen"); return; }
+    const k = Math.min(1, 1800 / Math.max(v.videoWidth, v.videoHeight));
+    const W = Math.round(v.videoWidth * k), H = Math.round(v.videoHeight * k);
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    c.getContext("2d").drawImage(v, 0, 0, W, H);          // instantáneo: aquí se toma la foto
+    const shot = { sheet: sheet, row: row, w: W, h: H, bytes: null, url: null, dead: false };
+    shots.push(shot);
+    if (perRow > 0 && count(s => s.sheet === sheet && s.row === row) >= perRow) row++;
+    hud();
+    const f = $("flash"); f.classList.add("go");
+    requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove("go")));
+    encodeQueue = encodeQueue.then(() => encode(shot, c)).catch(() => {}); // el JPEG se guarda en segundo plano
+  }
+  async function encode(shot, c){
+    try {
+      if (shot.dead) return;
+      const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.82));
+      if (!blob || shot.dead) return;
+      shot.bytes = new Uint8Array(await blob.arrayBuffer());
+      shot.url = URL.createObjectURL(blob);
+    } finally { c.width = c.height = 0; }
   }
 
   async function openCamera(){
@@ -284,7 +366,11 @@ function buildZip(files){
       stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false
       });
-    } catch (e) { return "No se pudo abrir la cámara. Revisa el permiso del navegador para esta página."; }
+    } catch (e) { return "No se pudo abrir la cámara. Revisa el permiso de cámara de la app."; }
+    try { // enfoque continuo, si el celular lo permite
+      const t = stream.getVideoTracks()[0], caps = t.getCapabilities ? t.getCapabilities() : {};
+      if (caps.focusMode && caps.focusMode.includes("continuous")) await t.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+    } catch (e) {}
     const v = $("v"); v.srcObject = stream; await v.play().catch(() => {});
     try { wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; }
     return "";
@@ -294,59 +380,116 @@ function buildZip(files){
     if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
     if (wake){ try { wake.release(); } catch (e) {} wake = null; }
   }
+  function clearShots(){
+    shots.forEach(s => { s.dead = true; if (s.url) URL.revokeObjectURL(s.url); });
+    shots = []; sheet = 1; row = 0;
+  }
+
+  // ---- Menú ----
+  function refreshMenu(){
+    const n = shots.length, hojas = new Set(shots.map(s => s.sheet)).size;
+    confirmStart = confirmDel = false;
+    $("resume").hidden = n === 0;
+    $("resInfo").textContent = "Sesión guardada: " + n + (n === 1 ? " foto" : " fotos") + " en " + hojas + (hojas === 1 ? " hoja" : " hojas");
+    $("start").textContent = n ? "Empezar de nuevo (borra las fotos)" : "Empezar";
+    $("resDel").textContent = "Descartar fotos";
+  }
+  function goMenu(){
+    closeCamera(); paused = true; renderId++; $("pause").hidden = true;
+    show("setup"); refreshMenu();
+  }
+  const back = () => { if (history.state && history.state.s === "in") history.back(); else goMenu(); };
+  window.addEventListener("popstate", goMenu);
+  $("back1").addEventListener("click", back);
+  $("back2").addEventListener("click", back);
 
   async function start(){
+    if (shots.length && !confirmStart){ confirmStart = true; $("start").textContent = "¿Seguro? Se borran las fotos. Toca otra vez"; return; }
     $("err").textContent = "";
     const e = await openCamera();
     if (e){ $("err").textContent = e; return; }
-    shots = []; sheet = 1; show("cap"); beginCapturing();
+    clearShots(); show("cap"); pushScreen(); startLoop();
+  }
+  async function continueSession(){
+    const target = $("setup").classList.contains("on") ? $("err") : $("err2");
+    target.textContent = "";
+    const e = await openCamera();
+    if (e){ target.textContent = e; return; }
+    renderId++; show("cap"); pushScreen();
+    setPause("Cámara lista", "Toca la pantalla para continuar en la hoja " + sheet);
   }
 
+  function rowDone(){
+    if (count(s => s.sheet === sheet && s.row === row) === 0){ say("Esta fila todavía no tiene fotos"); return; }
+    row++; hud(); say("Fila " + (row + 1) + ": ahora baja la cámara");
+  }
   function sheetDone(){
-    if (inSheet() === 0){ say("Esta hoja todavía no tiene fotos"); return; }
-    const done = sheet; sheet++;
+    if (count(s => s.sheet === sheet) === 0){ say("Esta hoja todavía no tiene fotos"); return; }
+    const done = sheet; sheet++; row = 0;
     setPause("Hoja " + done + " completada", "Toca la pantalla para empezar la hoja " + sheet);
   }
   function undo(){
     for (let i = shots.length - 1; i >= 0; i--){
-      if (shots[i].sheet === sheet){ URL.revokeObjectURL(shots[i].url); shots.splice(i, 1); break; }
+      if (shots[i].sheet === sheet){
+        const s = shots[i]; s.dead = true; if (s.url) URL.revokeObjectURL(s.url);
+        shots.splice(i, 1);
+        if (count(x => x.sheet === sheet && x.row === row) === 0 && s.row < row) row = s.row;
+        break;
+      }
     }
     hud();
   }
 
-  function sheetsList(){
+  // ---- Resultado ----
+  function grouped(){
     const m = new Map();
-    shots.forEach(s => { if (!m.has(s.sheet)) m.set(s.sheet, []); m.get(s.sheet).push(s); });
-    return [...m.entries()].sort((a, b) => a[0] - b[0]);
-  }
-  function labelled(){
-    const out = [];
-    sheetsList().forEach(([sh, list]) => list.forEach((s, i) => out.push(
-      { bytes: s.bytes, w: s.w, h: s.h, label: "Hoja " + sh + " - foto " + (i + 1) + " de " + list.length })));
-    return out;
+    shots.filter(s => s.bytes).forEach(s => {
+      if (!m.has(s.sheet)) m.set(s.sheet, new Map());
+      const r = m.get(s.sheet); if (!r.has(s.row)) r.set(s.row, []); r.get(s.row).push(s);
+    });
+    return [...m.entries()].sort((a, b) => a[0] - b[0]).map(([sh, rows]) =>
+      ({ sheet: sh, rows: [...rows.entries()].sort((a, b) => a[0] - b[0]).map(e => e[1]) }));
   }
   function nameFor(ext){
     const d = new Date();
     return "fotos-" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "-" + pad(d.getHours()) + pad(d.getMinutes()) + "." + ext;
   }
-
-  function generate(){
+  async function generate(){
     if (shots.length === 0){ say("Todavía no hay fotos"); return; }
-    closeCamera(); paused = true; show("done"); $("err2").textContent = ""; confirmNew = false; $("again").textContent = "Nueva sesión";
-    const groups = sheetsList();
-    $("info").textContent = shots.length + (shots.length === 1 ? " foto" : " fotos") + " en " + groups.length + (groups.length === 1 ? " hoja" : " hojas");
+    closeCamera(); paused = true; show("done"); pushScreen(); confirmNew = false; $("again").textContent = "Nueva sesión";
+    const id = ++renderId;
+    $("err2").textContent = ""; $("prog").textContent = "Guardando las últimas fotos…"; pdfBlob = null;
+    ["dl", "share", "zip"].forEach(k => $(k).disabled = true);
+    await encodeQueue;
+    if (id !== renderId) return;
+    $("prog").textContent = "";
+    const groups = grouped(), n = groups.reduce((a, g) => a + g.rows.reduce((b, r) => b + r.length, 0), 0);
+    if (!n){ $("info").textContent = "No se pudo guardar ninguna foto"; return; }
+    $("info").textContent = n + (n === 1 ? " foto" : " fotos") + " en " + groups.length + (groups.length === 1 ? " hoja" : " hojas");
     const t = $("thumbs"); t.innerHTML = "";
-    groups.forEach(([sh, list]) => {
-      const h = document.createElement("h2"); h.textContent = "Hoja " + sh + " · " + list.length + (list.length === 1 ? " foto" : " fotos"); t.appendChild(h);
-      list.forEach(s => { const i = new Image(); i.src = s.url; i.alt = "Hoja " + sh; t.appendChild(i); });
+    groups.forEach(g => {
+      const nf = g.rows.reduce((a, r) => a + r.length, 0);
+      const h = document.createElement("h2"); h.textContent = "Hoja " + g.sheet + " · " + nf + (nf === 1 ? " foto" : " fotos") + " en " + g.rows.length + (g.rows.length === 1 ? " fila" : " filas"); t.appendChild(h);
+      const box = document.createElement("div"); box.className = "sheet";
+      g.rows.forEach(r => {
+        const rd = document.createElement("div"); rd.className = "r";
+        r.forEach(s => { const i = new Image(); i.src = s.url; i.alt = "Hoja " + g.sheet; i.style.flexGrow = (s.w / s.h).toFixed(3); rd.appendChild(i); });
+        box.appendChild(rd);
+      });
+      t.appendChild(box);
     });
     try {
-      pdfBlob = buildPdf(labelled());
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-      pdfUrl = URL.createObjectURL(pdfBlob);
+      const pages = groups.map(g => {
+        const nf = g.rows.reduce((a, r) => a + r.length, 0);
+        const L = layoutSheet(g.rows);
+        return { W: L.W, H: L.H, items: L.items, label: "Hoja " + g.sheet + " - " + nf + (nf === 1 ? " foto" : " fotos") + " en " + g.rows.length + (g.rows.length === 1 ? " fila" : " filas") };
+      });
+      pdfBlob = buildPdf(pages);
     } catch (e) { $("err2").textContent = "No se pudo armar el PDF."; pdfBlob = null; }
+    ["dl", "zip"].forEach(k => $(k).disabled = false);
     const f = fileObj();
     $("share").hidden = native || !(navigator.canShare && f && navigator.canShare({ files: [f] }));
+    $("share").disabled = false;
     $("dl").textContent = native ? "Guardar o enviar PDF" : "Descargar PDF";
   }
   function fileObj(){
@@ -356,9 +499,7 @@ function buildZip(files){
     const a = document.createElement("a"); a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
   }
-  // En la app instalada (APK) las descargas del navegador no existen: se guarda el archivo
-  // en la app y se abre el menú de Android para guardarlo o enviarlo.
-  const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  // En la app instalada (APK) no hay descargas del navegador: se guarda el archivo y se abre el menú de Android.
   function blobToBase64(blob){
     return new Promise((res, rej) => {
       const r = new FileReader();
@@ -376,7 +517,8 @@ function buildZip(files){
   async function deliver(blob, name){
     $("err2").textContent = "";
     try {
-      if (native) await nativeSave(blob, name); else save(URL.createObjectURL(blob), name);
+      if (native) await nativeSave(blob, name);
+      else { const u = URL.createObjectURL(blob); save(u, name); setTimeout(() => URL.revokeObjectURL(u), 60000); }
     } catch (e) {
       const m = String((e && e.message) || e);
       if (!/cancel/i.test(m)) $("err2").textContent = "No se pudo guardar el archivo. " + m;
@@ -384,13 +526,20 @@ function buildZip(files){
   }
 
   $("start").addEventListener("click", start);
+  $("rowDone").addEventListener("click", rowDone);
   $("sheetDone").addEventListener("click", sheetDone);
   $("gen").addEventListener("click", generate);
   $("undo").addEventListener("click", undo);
-  const resume = () => { if (paused && stream) beginCapturing(); };
+  const resume = () => { if (paused && stream) startLoop(); };
   $("pause").addEventListener("click", resume);
   $("pause").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") resume(); });
 
+  $("resGo").addEventListener("click", continueSession);
+  $("resPdf").addEventListener("click", generate);
+  $("resDel").addEventListener("click", () => {
+    if (!confirmDel){ confirmDel = true; $("resDel").textContent = "¿Seguro? Toca otra vez para borrar"; return; }
+    clearShots(); refreshMenu();
+  });
   $("dl").addEventListener("click", () => { if (pdfBlob) deliver(pdfBlob, nameFor("pdf")); });
   $("share").addEventListener("click", async () => {
     const f = fileObj(); if (!f) return;
@@ -398,19 +547,14 @@ function buildZip(files){
   });
   $("zip").addEventListener("click", () => {
     const files = [];
-    sheetsList().forEach(([sh, list]) => list.forEach((s, i) => files.push({ name: "hoja" + pad(sh) + "-foto" + pad(i + 1) + ".jpg", bytes: s.bytes })));
+    grouped().forEach(g => g.rows.forEach((r, ri) => r.forEach((s, i) =>
+      files.push({ name: "hoja" + pad(g.sheet) + "-fila" + pad(ri + 1) + "-foto" + pad(i + 1) + ".jpg", bytes: s.bytes }))));
     deliver(buildZip(files), nameFor("zip"));
   });
-  $("more").addEventListener("click", async () => {
-    $("err2").textContent = "";
-    const e = await openCamera();
-    if (e){ $("err2").textContent = e; return; }
-    show("cap"); setPause("Cámara lista", "Toca la pantalla para continuar con la hoja " + sheet);
-  });
+  $("more").addEventListener("click", continueSession);
   $("again").addEventListener("click", () => {
     if (!confirmNew){ confirmNew = true; $("again").textContent = "¿Seguro? Se borran todas las fotos. Toca otra vez"; return; }
-    shots.forEach(s => URL.revokeObjectURL(s.url)); shots = []; sheet = 1; pdfBlob = null;
-    confirmNew = false; $("again").textContent = "Nueva sesión"; show("setup");
+    clearShots(); back();
   });
 
   document.addEventListener("visibilitychange", async () => {
@@ -419,6 +563,7 @@ function buildZip(files){
   if (!native && "serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
+  hud(); refreshMenu();
 })();
 </script>
 </body>
