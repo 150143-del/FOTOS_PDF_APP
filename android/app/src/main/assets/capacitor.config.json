@@ -1,0 +1,8 @@
+{
+	"appId": "com.mar.fotospdf",
+	"appName": "Fotos a PDF",
+	"webDir": "www",
+	"android": {
+		"allowMixedContent": false
+	}
+}
