@@ -1,7 +1,11 @@
 package com.mar.fotospdf;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.WindowManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -10,5 +14,9 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         // Mantiene la pantalla encendida mientras la app está abierta (las fotos son automáticas).
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // Pide el permiso de cámara apenas se abre la app, para que ya esté concedido al empezar.
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, 4711);
+        }
     }
 }
