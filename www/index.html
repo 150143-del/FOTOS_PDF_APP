@@ -60,7 +60,7 @@
   #rec{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--danger);margin-right:8px;animation:p 1s infinite}
   @keyframes p{50%{opacity:.25}}
   @media (prefers-reduced-motion:reduce){#rec{animation:none}}
-  #undo{pointer-events:auto;border:1px solid #ffffff66;background:#0008;color:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
+  #undo{position:absolute;top:max(10px,env(safe-area-inset-top));right:12px;z-index:6;pointer-events:auto;border:1px solid #ffffff66;background:#0008;color:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
   #undo:disabled{opacity:.4}
   #bar{position:absolute;left:0;bottom:0;height:5px;background:var(--accent);width:0;z-index:3}
   #msg{position:absolute;left:16px;right:16px;bottom:18px;z-index:3;text-align:center;font-weight:600;background:#000c;padding:10px;border-radius:10px;pointer-events:none}
@@ -110,6 +110,10 @@
   .watch #info{font-size:4.8vmin}
   .watch .back{width:12vmin;height:12vmin;font-size:6vmin}
 
+  /* La captura se dibuja en un cuadrado de 100vmin pegado arriba: si el WebView del reloj es más alto
+     que lo visible, los botones de abajo ya no quedan fuera de pantalla. */
+  .watch #cap{inset:auto;top:0;left:calc(50% - 50vmin);width:100vmin;height:100vmin;border-radius:50%;overflow:hidden}
+  .watch #controls .btn{flex:none;pointer-events:auto}
   .watch #bar{display:none}
   .watch #ring{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none}
   .watch #ring circle{fill:none;stroke-width:1.8}
@@ -121,13 +125,13 @@
   .watch #l1{font-size:4.4vmin}
   .watch #l2{font-size:3.2vmin}
   .watch #cd{font-size:3.8vmin}
-  .watch #undo{position:fixed;left:4vmin;top:50%;transform:translateY(-50%);padding:2vmin 2.6vmin;font-size:3.6vmin;border-radius:5vmin}
+  .watch #undo{right:auto;left:4vmin;top:50%;transform:translateY(-50%);padding:2vmin 2.6vmin;font-size:3.6vmin;border-radius:5vmin}
   .watch #msg{left:17vmin;right:17vmin;bottom:28vmin;font-size:3.6vmin;padding:2vmin}
   .watch #pause{padding:15vmin 14vmin;gap:1.6vmin}
   .watch #pause b{font-size:6vmin}
   .watch #pause span{font-size:3.8vmin}
   .watch #hint-watch{display:block;font-size:3.2vmin;color:#ffffffaa;margin-top:1.5vmin}
-  .watch #controls{position:absolute;left:0;right:0;bottom:8.5vmin;z-index:3;display:flex;justify-content:center;gap:2.2vmin;padding:0;background:none}
+  .watch #controls{position:absolute;left:0;right:0;bottom:8.5vmin;z-index:20;display:flex;justify-content:center;gap:2.2vmin;padding:0;background:none}
   .watch #controls .btn{width:14.5vmin;height:14.5vmin;min-height:0;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3.7vmin;grid-column:auto}
   .watch #controls .btn.alt{background:#000c;border:1.5px solid #ffffff99}
   .watch #controls .lbl{display:none}
@@ -163,21 +167,6 @@
       <button class="chip" data-n="4" aria-pressed="false">4</button>
     </div>
   </div>
-  <div id="g2">
-    <label class="t">Cámara</label>
-    <div class="row" id="faces" style="margin-top:8px">
-      <button class="chip" data-f="environment" aria-pressed="true">Trasera</button>
-      <button class="chip" data-f="user" aria-pressed="false">Frontal</button>
-    </div>
-  </div>
-  <div id="g4" hidden>
-    <label class="t">Motor de cámara</label>
-    <div class="row" id="engine" style="margin-top:8px">
-      <button class="chip" data-e="auto" aria-pressed="true">Auto</button>
-      <button class="chip" data-e="web" aria-pressed="false">Web</button>
-      <button class="chip" data-e="native" aria-pressed="false">Nativa</button>
-    </div>
-  </div>
   <div id="g3">
     <label class="t">Diseño de pantalla</label>
     <div class="row" id="layout" style="margin-top:8px">
@@ -201,8 +190,8 @@
     <div id="hud">
       <button class="back" id="back1" type="button" aria-label="Volver al menú">&larr;</button>
       <div id="hudText"><div id="l1"><span id="rec"></span><span id="l1t"></span></div><div id="l2"></div><div id="cd"></div></div>
-      <button id="undo" type="button" aria-label="Borrar última foto"><span class="lbl-long">Borrar última</span><span class="lbl-short">Borrar</span></button>
     </div>
+    <button id="undo" type="button" aria-label="Borrar última foto"><span class="lbl-long">Borrar última</span><span class="lbl-short">Borrar</span></button>
     <div id="bar"></div>
     <svg id="ring" viewBox="0 0 100 100" aria-hidden="true"><circle id="ringBg" cx="50" cy="50" r="48.2"/><circle id="ringC" cx="50" cy="50" r="48.2"/></svg>
     <div id="msg" hidden></div>
@@ -344,8 +333,9 @@ function buildZip(files){
   const pad = (n) => String(n).padStart(2, "0");
   const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
-  let seconds = 2, facing = "environment", perRow = 0;
-  let stream = null, nativeCam = false, nbusy = false, camEngine = "auto", runId = 0, wake = null, msgTimer = null, cdTimer = null, nextAt = 0;
+  let seconds = 2, perRow = 0;
+  const facing = "environment";   // cámara nativa predeterminada del reloj
+  let stream = null, nativeCam = false, nbusy = false, runId = 0, wake = null, msgTimer = null, cdTimer = null, nextAt = 0;
   let shots = [];              // {sheet,row,w,h,bytes,url,dead}
   let sheet = 1, row = 0, paused = true;
   let encodeQueue = Promise.resolve();
@@ -356,7 +346,7 @@ function buildZip(files){
   const CP = () => (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CameraPreview) || null;
   const hasNative = () => !!CP();
   const camOn = () => !!stream || nativeCam;
-  const STEPS = () => hasNative() ? ["g0", "g1", "g2", "g4", "g3"] : ["g0", "g1", "g2", "g3"];
+  const STEPS = () => ["g0", "g1", "g3"];
 
   // ---- Diseño: reloj redondo o celular ----
   try { layoutPref = localStorage.getItem("fotospdf-layout") || "auto"; } catch (e) {}
@@ -375,9 +365,8 @@ function buildZip(files){
     if (sv === "main") (n ? ["resume", "resInfo", "resGo", "resPdf", "wMore"] : ["start", "wSettings"]).forEach(x => vis.add(x));
     else if (sv === "more") ["resume", "resDel", "start", "wSettings", "wBack"].forEach(x => vis.add(x));
     else { vis.add(sv); vis.add("wnav"); }
-    ["resume", "resInfo", "resGo", "resPdf", "resDel", "g0", "g1", "g2", "g3", "g4", "start", "wSettings", "wMore", "wnav", "wBack"]
+    ["resume", "resInfo", "resGo", "resPdf", "resDel", "g0", "g1", "g3", "start", "wSettings", "wMore", "wnav", "wBack"]
       .forEach(id => $(id).classList.toggle("vhide", isWatch && !vis.has(id)));
-    $("g4").hidden = !hasNative();
     const st = STEPS(), i = st.indexOf(sv);
     $("sTitle").textContent = !isWatch || sv === "main" ? "Fotos a PDF" : sv === "more" ? "Más opciones" : "Ajustes " + (i + 1) + "/" + st.length;
     $("sTitle").classList.toggle("vhide", isWatch && sv === "more");
@@ -408,9 +397,7 @@ function buildZip(files){
     });
   }
   pick("intervals", "s", v => seconds = +v);
-  pick("faces", "f", v => facing = v);
   pick("perrow", "n", v => perRow = +v);
-  pick("engine", "e", v => camEngine = v);
 
   const count = (f) => shots.filter(f).length;
   function hud(){
@@ -574,13 +561,13 @@ function buildZip(files){
     let first = "No se pudo abrir la cámara.";
     if (we && we.name === "NotAllowedError" && perm !== "prompt") first = "Falta el permiso de cámara. Actívalo en Ajustes del reloj → Apps → Fotos a PDF → Permisos.";
     else if (we && we.name === "NotReadableError") first = "La cámara está ocupada por otra app. Ciérrala y prueba otra vez.";
-    else if (!hasNative()) first = "La cámara web no abrió. Prueba el APK \"cámara nativa\".";
+    else if (!hasNative()) first = "No se pudo abrir la cámara del reloj. Revisa el permiso de cámara.";
     return first + "\nWeb: " + (errText(we) || "no se probó") + "\nNativa: " + (hasNative() ? (errText(ne) || "no se probó") : "no incluida") +
            "\nPermiso: " + perm + " · Cámaras: " + n + " · WebView " + (m ? m[1] : "?");
   }
   async function openCamera(){
     let we = null, ne = null;
-    const order = camEngine === "web" ? ["web"] : camEngine === "native" ? ["native"] : ["web", "native"];
+    const order = ["native", "web"];
     for (const eng of order){
       try {
         if (eng === "web") await openWeb(); else await openNative();
