@@ -34,7 +34,10 @@
   .btn.alt{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
   .btn:disabled{opacity:.5}
   .btn:focus-visible,.chip:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:2px}
-  .err{color:var(--danger);min-height:1.4em}
+  .err{color:var(--danger);min-height:1.4em;white-space:pre-line}
+  /* Cámara nativa: el video queda detrás de la página, que debe ser transparente */
+  .nativecam,.nativecam body,.nativecam #cap,.nativecam #stage{background:transparent!important}
+  .nativecam #v{display:none}
   .back{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid #ffffff55;background:#000a;color:#fff;
     font-size:1.5rem;line-height:1;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center}
 
@@ -87,21 +90,23 @@
   .watch body{font-size:clamp(11px,5.2vmin,24px)}
   .watch #intro{display:none}
   .watch h1{font-size:6.6vmin;text-align:center}
-  /* Menú del reloj: scroll vertical real y botón Empezar siempre arriba */
-  .watch #setup{max-width:none;width:100%;height:100%;padding:8vmin 13vmin 10vmin;gap:2.2vmin;justify-content:flex-start;text-align:center;align-items:stretch;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .watch #done{max-width:none;padding:9vmin 13vmin 12vmin;gap:2.6vmin;justify-content:flex-start;text-align:center;align-items:stretch;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-  .watch #start{order:-1;position:sticky;top:0;z-index:5;flex:none;margin-bottom:1vmin;box-shadow:0 2px 8px #0008}
-  .watch #setup>div{flex:none}
-  .watch #setup .row{flex-wrap:nowrap}
+  .wonly{display:none}
+  .watch .wonly{display:block}
+  .watch #wnav.wonly{display:flex}
+  .watch .vhide{display:none!important}
+  /* Menús del reloj: pantallas cortas centradas, sin lista larga. Si algo no cupiera, aún se puede desplazar. */
+  .watch #setup,.watch #done{max-width:none;padding:12.5vmin 15vmin;gap:2vmin;justify-content:center;text-align:center;align-items:stretch}
+  .watch #wnav{gap:2vmin}
+  .watch #wnav .btn{flex:1}
   .watch label.t{font-size:3.3vmin;display:block;text-align:center}
   .watch .row{gap:1.6vmin}
-  .watch .chip{min-width:0;padding:2.6vmin 1vmin;font-size:4.4vmin;border-radius:5vmin}
+  .watch .chip{min-width:0;min-height:13vmin;padding:2vmin 1vmin;font-size:4.8vmin;border-radius:5vmin;display:flex;align-items:center;justify-content:center}
   .watch .btn{min-height:11.5vmin;padding:2.4vmin 3vmin;font-size:4.6vmin;border-radius:7vmin}
-  .watch .err{font-size:3.5vmin;min-height:0}
-  .watch #resume{padding:2.6vmin;gap:1.6vmin;border-radius:6vmin}
+  .watch .err{font-size:3vmin;min-height:0;line-height:1.3}
+  .watch #resume{padding:0;border:0;background:none;gap:1.8vmin}
   .watch #resume b{font-size:4.2vmin}
   .watch #thumbs{display:none}
-  .watch #head{flex-direction:column;gap:1.6vmin}
+  .watch #head{flex-direction:column;gap:1.2vmin;align-items:center}
   .watch #info{font-size:4.8vmin}
   .watch .back{width:12vmin;height:12vmin;font-size:6vmin}
 
@@ -133,7 +138,7 @@
 <body>
 
 <section id="setup" class="screen on">
-  <h1>Fotos a PDF</h1>
+  <h1 id="sTitle">Fotos a PDF</h1>
   <p id="intro">Toma fotos solas cada pocos segundos. Las fotos de una hoja se arman en una sola página del PDF.</p>
   <div id="resume" hidden>
     <b id="resInfo"></b>
@@ -141,7 +146,7 @@
     <button class="btn alt" id="resPdf" type="button">Generar PDF</button>
     <button class="btn alt" id="resDel" type="button">Descartar fotos</button>
   </div>
-  <div>
+  <div id="g0">
     <label class="t">Una foto cada</label>
     <div class="row" id="intervals" style="margin-top:8px">
       <button class="chip" data-s="2" aria-pressed="true">2 s</button>
@@ -149,7 +154,7 @@
       <button class="chip" data-s="5" aria-pressed="false">5 s</button>
     </div>
   </div>
-  <div>
+  <div id="g1">
     <label class="t">Fotos por fila</label>
     <div class="row" id="perrow" style="margin-top:8px">
       <button class="chip" data-n="0" aria-pressed="true">Yo decido</button>
@@ -158,14 +163,22 @@
       <button class="chip" data-n="4" aria-pressed="false">4</button>
     </div>
   </div>
-  <div>
+  <div id="g2">
     <label class="t">Cámara</label>
     <div class="row" id="faces" style="margin-top:8px">
       <button class="chip" data-f="environment" aria-pressed="true">Trasera</button>
       <button class="chip" data-f="user" aria-pressed="false">Frontal</button>
     </div>
   </div>
-  <div>
+  <div id="g4" hidden>
+    <label class="t">Motor de cámara</label>
+    <div class="row" id="engine" style="margin-top:8px">
+      <button class="chip" data-e="auto" aria-pressed="true">Auto</button>
+      <button class="chip" data-e="web" aria-pressed="false">Web</button>
+      <button class="chip" data-e="native" aria-pressed="false">Nativa</button>
+    </div>
+  </div>
+  <div id="g3">
     <label class="t">Diseño de pantalla</label>
     <div class="row" id="layout" style="margin-top:8px">
       <button class="chip" data-l="auto" aria-pressed="true">Auto</button>
@@ -175,6 +188,10 @@
   </div>
   <button class="btn" id="start" type="button">Empezar</button>
   <div class="err" id="err" role="alert"></div>
+  <button class="btn alt wonly" id="wSettings" type="button">Ajustes</button>
+  <button class="btn alt wonly" id="wMore" type="button">Más opciones</button>
+  <div id="wnav" class="wonly row"><button class="btn alt" id="wPrev" type="button">&lsaquo; Atrás</button><button class="btn" id="wNext" type="button">Siguiente &rsaquo;</button></div>
+  <button class="btn alt wonly" id="wBack" type="button">&lsaquo; Volver</button>
 </section>
 
 <section id="cap" class="screen">
@@ -209,6 +226,8 @@
   <button class="btn alt" id="zip" type="button">Fotos sueltas (ZIP)</button>
   <button class="btn alt" id="more" type="button">Seguir tomando fotos</button>
   <button class="btn alt" id="again" type="button">Nueva sesión</button>
+  <button class="btn alt wonly" id="wMore2" type="button">Más opciones</button>
+  <button class="btn alt wonly" id="wBack2" type="button">&lsaquo; Volver</button>
   <div class="err" id="err2" role="alert"></div>
   <div id="thumbs"></div>
 </section>
@@ -326,14 +345,18 @@ function buildZip(files){
   const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
   let seconds = 2, facing = "environment", perRow = 0;
-  let stream = null, runId = 0, wake = null, msgTimer = null, cdTimer = null, nextAt = 0;
+  let stream = null, nativeCam = false, nbusy = false, camEngine = "auto", runId = 0, wake = null, msgTimer = null, cdTimer = null, nextAt = 0;
   let shots = [];              // {sheet,row,w,h,bytes,url,dead}
   let sheet = 1, row = 0, paused = true;
   let encodeQueue = Promise.resolve();
   let pdfBlob = null, renderId = 0;
   let confirmStart = false, confirmDel = false, confirmNew = false;
-  let isWatch = false, layoutPref = "auto";
+  let isWatch = false, layoutPref = "auto", sv = "main", dv = "main";
   const RING = 2 * Math.PI * 48.2;
+  const CP = () => (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CameraPreview) || null;
+  const hasNative = () => !!CP();
+  const camOn = () => !!stream || nativeCam;
+  const STEPS = () => hasNative() ? ["g0", "g1", "g2", "g4", "g3"] : ["g0", "g1", "g2", "g3"];
 
   // ---- Diseño: reloj redondo o celular ----
   try { layoutPref = localStorage.getItem("fotospdf-layout") || "auto"; } catch (e) {}
@@ -344,6 +367,26 @@ function buildZip(files){
     isWatch = layoutPref === "watch" || (layoutPref === "auto" && auto);
     document.documentElement.classList.toggle("watch", isWatch);
     [...$("layout").children].forEach(c => c.setAttribute("aria-pressed", c.dataset.l === layoutPref ? "true" : "false"));
+    renderSetup(); renderDone();
+  }
+  // En el reloj los menús son páginas cortas: así no hace falta desplazarse para llegar a "Empezar".
+  function renderSetup(){
+    const n = shots.length, vis = new Set();
+    if (sv === "main") (n ? ["resume", "resInfo", "resGo", "resPdf", "wMore"] : ["start", "wSettings"]).forEach(x => vis.add(x));
+    else if (sv === "more") ["resume", "resDel", "start", "wSettings", "wBack"].forEach(x => vis.add(x));
+    else { vis.add(sv); vis.add("wnav"); }
+    ["resume", "resInfo", "resGo", "resPdf", "resDel", "g0", "g1", "g2", "g3", "g4", "start", "wSettings", "wMore", "wnav", "wBack"]
+      .forEach(id => $(id).classList.toggle("vhide", isWatch && !vis.has(id)));
+    $("g4").hidden = !hasNative();
+    const st = STEPS(), i = st.indexOf(sv);
+    $("sTitle").textContent = !isWatch || sv === "main" ? "Fotos a PDF" : sv === "more" ? "Más opciones" : "Ajustes " + (i + 1) + "/" + st.length;
+    $("sTitle").classList.toggle("vhide", isWatch && sv === "more");
+    $("wNext").innerHTML = i === st.length - 1 ? "Listo" : "Siguiente &rsaquo;";
+  }
+  function renderDone(){
+    const vis = new Set(dv === "main" ? ["head", "prog", "dl", "share", "more", "wMore2"] : ["prog", "zip", "again", "wBack2"]);
+    ["head", "prog", "dl", "share", "zip", "more", "again", "wMore2", "wBack2"]
+      .forEach(id => $(id).classList.toggle("vhide", isWatch && !vis.has(id)));
   }
   $("layout").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
@@ -367,6 +410,7 @@ function buildZip(files){
   pick("intervals", "s", v => seconds = +v);
   pick("faces", "f", v => facing = v);
   pick("perrow", "n", v => perRow = +v);
+  pick("engine", "e", v => camEngine = v);
 
   const count = (f) => shots.filter(f).length;
   function hud(){
@@ -422,7 +466,29 @@ function buildZip(files){
     tick(id);
   }
 
+  async function captureNative(){
+    if (nbusy) return;                        // si la foto anterior aún no vuelve, se salta este disparo
+    nbusy = true;
+    const mySheet = sheet, myRow = row;
+    try {
+      const r = await CP().captureSample({ quality: 85 });
+      if (!nativeCam) return;
+      const bin = atob(String(r.value).replace(/^data:[^,]*,/, ""));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: "image/jpeg" }));
+      const dim = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([0, 0]); im.src = url; });
+      if (!dim[0]){ URL.revokeObjectURL(url); say("No se pudo leer la foto"); return; }
+      shots.push({ sheet: mySheet, row: myRow, w: dim[0], h: dim[1], bytes: bytes, url: url, dead: false });
+      if (perRow > 0 && sheet === mySheet && row === myRow && count(s => s.sheet === mySheet && s.row === myRow) >= perRow) row++;
+      hud();
+      const f = $("flash"); f.classList.add("go");
+      requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove("go")));
+    } catch (e) { say("La cámara no respondió"); }
+    finally { nbusy = false; }
+  }
   function capture(){
+    if (nativeCam){ captureNative(); return; }
     const v = $("v");
     if (!v.videoWidth || v.readyState < 2){ say("La cámara todavía no entrega imagen"); return; }
     const k = Math.min(1, (isWatch ? 1600 : 1800) / Math.max(v.videoWidth, v.videoHeight));
@@ -447,52 +513,90 @@ function buildZip(files){
     } finally { c.width = c.height = 0; }
   }
 
-  async function openCamera(){
-    // Compatibilidad con WebView antiguos de Android 10 y relojes de baja potencia:
-    // evita restricciones de resolución/facingMode que algunos drivers no aceptan.
-    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function"){
-      return "La cámara no está disponible en este WebView. Actualiza Android System WebView/Chrome y verifica el permiso Cámara de la APK.";
-    }
-    const attempts = [
-      { video: { facingMode: { ideal: facing } }, audio: false },
+  // Abre la cámara por dos vías: la del navegador integrado (web) y, si el APK la incluye, la nativa de Android.
+  function withTimeout(p, ms){
+    return new Promise((res, rej) => {
+      let done = false;
+      const t = setTimeout(() => { done = true; const e = new Error("tiempo agotado"); e.name = "Timeout"; rej(e); }, ms);
+      p.then(v => { if (done){ try { v.getTracks().forEach(x => x.stop()); } catch (e) {} } else { clearTimeout(t); res(v); } },
+             e => { if (!done){ clearTimeout(t); rej(e); } });
+    });
+  }
+  async function openWeb(){
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ const e = new Error("sin acceso a la cámara web"); e.name = "SinApi"; throw e; }
+    const gum = (c) => withTimeout(navigator.mediaDevices.getUserMedia(c), 8000);
+    const W = isWatch ? 1280 : 1920, H = isWatch ? 720 : 1080;
+    const tries = [
+      { video: { facingMode: { ideal: facing }, width: { ideal: W }, height: { ideal: H } }, audio: false },
       { video: { facingMode: facing }, audio: false },
       { video: true, audio: false }
     ];
-    let lastError = null;
-    stream = null;
-    for (const constraints of attempts){
-      try { stream = await navigator.mediaDevices.getUserMedia(constraints); break; }
-      catch (e){ lastError = e; }
+    let last = null, s = null;
+    for (const c of tries){
+      try { s = await gum(c); break; } catch (e) { last = e; if (e && (e.name === "NotAllowedError" || e.name === "Timeout")) break; }
     }
-    if (!stream){
-      const name = lastError && lastError.name || "";
-      if (name === "NotAllowedError" || name === "PermissionDeniedError")
-        return "Permiso de cámara denegado. Habilita Cámara en Ajustes > Aplicaciones > esta APK > Permisos.";
-      if (name === "NotFoundError" || name === "DevicesNotFoundError")
-        return "Android no detectó una cámara disponible en el reloj.";
-      if (name === "NotReadableError" || name === "TrackStartError")
-        return "La cámara está ocupada o Android no pudo iniciarla. Cierra otras apps que la usen y vuelve a probar.";
-      return "No se pudo iniciar la cámara (" + (name || "error desconocido") + "). Revisa el permiso Cámara y la compatibilidad del WebView.";
+    if (!s){ // probar cada cámara por separado
+      try {
+        const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput" && d.deviceId);
+        for (const d of devs){ try { s = await gum({ video: { deviceId: { exact: d.deviceId } }, audio: false }); break; } catch (e) { last = e; } }
+      } catch (e) {}
     }
-    try { // Enfoque continuo es opcional; algunos relojes no soportan getCapabilities.
-      const t = stream.getVideoTracks && stream.getVideoTracks()[0];
-      const caps = t && t.getCapabilities ? t.getCapabilities() : {};
+    if (!s) throw last || new Error("sin cámara");
+    stream = s;
+    try { // enfoque continuo, si se puede
+      const t = s.getVideoTracks()[0], caps = t.getCapabilities ? t.getCapabilities() : {};
       if (caps.focusMode && caps.focusMode.includes("continuous")) await t.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
     } catch (e) {}
-    const v = $("v");
-    v.muted = true; v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.autoplay = true;
-    v.srcObject = stream;
-    try { await v.play(); }
-    catch (e){
-      stream.getTracks().forEach(t => t.stop()); stream = null; v.srcObject = null;
-      return "La cámara abrió, pero el video no pudo reproducirse. Revisa permisos y WebView de Android.";
+    const v = $("v"); v.srcObject = s; await v.play().catch(() => {});
+    for (let i = 0; i < 30 && !v.videoWidth; i++) await new Promise(r => setTimeout(r, 100));
+    if (!v.videoWidth){ s.getTracks().forEach(t => t.stop()); stream = null; const e = new Error("la cámara abrió pero no entrega imagen"); e.name = "SinImagen"; throw e; }
+  }
+  async function openNative(){
+    const cp = CP();
+    if (!cp){ const e = new Error("este APK no la incluye"); e.name = "NoIncluida"; throw e; }
+    const pos = facing === "user" ? "front" : "rear", alt = pos === "rear" ? "front" : "rear";
+    let last = null;
+    for (const p of [pos, alt]){
+      try {
+        await cp.start({ position: p, toBack: true, disableAudio: true, enableZoom: false, lockAndroidOrientation: false, storeToFile: false });
+        nativeCam = true; document.documentElement.classList.add("nativecam");
+        return;
+      } catch (e) { last = e; }
     }
-    try { if (navigator.wakeLock && navigator.wakeLock.request) wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; }
-    return "";
+    throw last || new Error("no abrió");
+  }
+  const errText = (e) => !e ? "" : typeof e === "string" ? e.slice(0, 60) : ((e.name && e.name !== "Error" ? e.name + " " : "") + (e.message || "")).trim().slice(0, 60);
+  async function explain(we, ne){
+    let perm = "?", n = "?";
+    try { perm = (await navigator.permissions.query({ name: "camera" })).state; } catch (e) {}
+    try { n = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput").length; } catch (e) {}
+    const m = /Chrome\/(\d+)/.exec(navigator.userAgent);
+    let first = "No se pudo abrir la cámara.";
+    if (we && we.name === "NotAllowedError" && perm !== "prompt") first = "Falta el permiso de cámara. Actívalo en Ajustes del reloj → Apps → Fotos a PDF → Permisos.";
+    else if (we && we.name === "NotReadableError") first = "La cámara está ocupada por otra app. Ciérrala y prueba otra vez.";
+    else if (!hasNative()) first = "La cámara web no abrió. Prueba el APK \"cámara nativa\".";
+    return first + "\nWeb: " + (errText(we) || "no se probó") + "\nNativa: " + (hasNative() ? (errText(ne) || "no se probó") : "no incluida") +
+           "\nPermiso: " + perm + " · Cámaras: " + n + " · WebView " + (m ? m[1] : "?");
+  }
+  async function openCamera(){
+    let we = null, ne = null;
+    const order = camEngine === "web" ? ["web"] : camEngine === "native" ? ["native"] : ["web", "native"];
+    for (const eng of order){
+      try {
+        if (eng === "web") await openWeb(); else await openNative();
+        try { wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; }
+        return "";
+      } catch (e) { if (eng === "web") we = e; else ne = e; }
+    }
+    return await explain(we, ne);
   }
   function closeCamera(){
     stopTimers();
     if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+    if (nativeCam){
+      nativeCam = false; document.documentElement.classList.remove("nativecam");
+      try { Promise.resolve(CP().stop()).catch(() => {}); } catch (e) {}
+    }
     if (wake){ try { wake.release(); } catch (e) {} wake = null; }
   }
   function clearShots(){
@@ -505,13 +609,17 @@ function buildZip(files){
     const n = shots.length, hojas = new Set(shots.map(s => s.sheet)).size;
     confirmStart = confirmDel = false;
     $("resume").hidden = n === 0;
-    $("resInfo").textContent = "Sesión guardada: " + n + (n === 1 ? " foto" : " fotos") + " en " + hojas + (hojas === 1 ? " hoja" : " hojas");
-    $("start").textContent = n ? "Empezar de nuevo (borra las fotos)" : "Empezar";
+    $("resInfo").textContent = isWatch
+      ? n + (n === 1 ? " foto" : " fotos") + " · " + hojas + (hojas === 1 ? " hoja" : " hojas")
+      : "Sesión guardada: " + n + (n === 1 ? " foto" : " fotos") + " en " + hojas + (hojas === 1 ? " hoja" : " hojas");
+    if (n === 0 && sv === "more") sv = "main";
+    renderSetup();
+    $("start").textContent = n ? (isWatch ? "Empezar de nuevo" : "Empezar de nuevo (borra las fotos)") : "Empezar";
     $("resDel").textContent = "Descartar fotos";
   }
   function goMenu(){
     closeCamera(); paused = true; renderId++; $("pause").hidden = true;
-    show("setup"); refreshMenu();
+    sv = "main"; show("setup"); refreshMenu();
   }
   const back = () => { if (history.state && history.state.s === "in") history.back(); else goMenu(); };
   window.addEventListener("popstate", goMenu);
@@ -519,7 +627,7 @@ function buildZip(files){
   $("back2").addEventListener("click", back);
 
   async function start(){
-    if (shots.length && !confirmStart){ confirmStart = true; $("start").textContent = "¿Seguro? Se borran las fotos. Toca otra vez"; return; }
+    if (shots.length && !confirmStart){ confirmStart = true; $("start").textContent = isWatch ? "¿Seguro? Toca otra vez" : "¿Seguro? Se borran las fotos. Toca otra vez"; return; }
     $("err").textContent = "";
     const e = await openCamera();
     if (e){ $("err").textContent = e; return; }
@@ -571,7 +679,7 @@ function buildZip(files){
   }
   async function generate(){
     if (shots.length === 0){ say("Todavía no hay fotos"); return; }
-    closeCamera(); paused = true; show("done"); pushScreen(); confirmNew = false; $("again").textContent = "Nueva sesión";
+    closeCamera(); paused = true; dv = "main"; renderDone(); show("done"); pushScreen(); confirmNew = false; $("again").textContent = "Nueva sesión";
     const id = ++renderId;
     $("err2").textContent = ""; $("prog").textContent = "Guardando las últimas fotos…"; pdfBlob = null;
     ["dl", "share", "zip"].forEach(k => $(k).disabled = true);
@@ -655,14 +763,21 @@ function buildZip(files){
   $("sheetDone").addEventListener("click", sheetDone);
   $("gen").addEventListener("click", generate);
   $("undo").addEventListener("click", undo);
-  const resume = () => { if (paused && stream) startLoop(); };
+  const resume = () => { if (paused && camOn()) startLoop(); };
   $("pause").addEventListener("click", resume);
   $("pause").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") resume(); });
 
+  $("wSettings").addEventListener("click", () => { sv = STEPS()[0]; renderSetup(); });
+  $("wMore").addEventListener("click", () => { sv = "more"; renderSetup(); });
+  $("wBack").addEventListener("click", () => { sv = "main"; renderSetup(); });
+  $("wPrev").addEventListener("click", () => { const st = STEPS(), i = st.indexOf(sv); sv = i <= 0 ? "main" : st[i - 1]; renderSetup(); });
+  $("wNext").addEventListener("click", () => { const st = STEPS(), i = st.indexOf(sv); sv = i >= st.length - 1 ? "main" : st[i + 1]; renderSetup(); });
+  $("wMore2").addEventListener("click", () => { dv = "more"; renderDone(); });
+  $("wBack2").addEventListener("click", () => { dv = "main"; renderDone(); });
   $("resGo").addEventListener("click", continueSession);
   $("resPdf").addEventListener("click", generate);
   $("resDel").addEventListener("click", () => {
-    if (!confirmDel){ confirmDel = true; $("resDel").textContent = "¿Seguro? Toca otra vez para borrar"; return; }
+    if (!confirmDel){ confirmDel = true; $("resDel").textContent = isWatch ? "¿Seguro? Toca otra vez" : "¿Seguro? Toca otra vez para borrar"; return; }
     clearShots(); refreshMenu();
   });
   $("dl").addEventListener("click", () => { if (pdfBlob) deliver(pdfBlob, nameFor("pdf")); });
@@ -678,12 +793,12 @@ function buildZip(files){
   });
   $("more").addEventListener("click", continueSession);
   $("again").addEventListener("click", () => {
-    if (!confirmNew){ confirmNew = true; $("again").textContent = "¿Seguro? Se borran todas las fotos. Toca otra vez"; return; }
+    if (!confirmNew){ confirmNew = true; $("again").textContent = isWatch ? "¿Seguro? Toca otra vez" : "¿Seguro? Se borran todas las fotos. Toca otra vez"; return; }
     clearShots(); back();
   });
 
   document.addEventListener("visibilitychange", async () => {
-    if (document.visibilityState === "visible" && stream && !wake){ try { wake = await navigator.wakeLock.request("screen"); } catch (e) {} }
+    if (document.visibilityState === "visible" && camOn() && !wake){ try { wake = await navigator.wakeLock.request("screen"); } catch (e) {} }
   });
   if (!native && "serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
     navigator.serviceWorker.register("sw.js").catch(() => {});
