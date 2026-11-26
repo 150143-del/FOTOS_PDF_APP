@@ -448,20 +448,46 @@ function buildZip(files){
   }
 
   async function openCamera(){
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      return "Este navegador no permite usar la cámara. Abre la página en Chrome o Safari desde una dirección https.";
+    // Compatibilidad con WebView antiguos de Android 10 y relojes de baja potencia:
+    // evita restricciones de resolución/facingMode que algunos drivers no aceptan.
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function"){
+      return "La cámara no está disponible en este WebView. Actualiza Android System WebView/Chrome y verifica el permiso Cámara de la APK.";
     }
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: facing }, width: { ideal: isWatch ? 1280 : 1920 }, height: { ideal: isWatch ? 720 : 1080 } }, audio: false
-      });
-    } catch (e) { return "No se pudo abrir la cámara. Revisa el permiso de cámara de la app."; }
-    try { // enfoque continuo, si el celular lo permite
-      const t = stream.getVideoTracks()[0], caps = t.getCapabilities ? t.getCapabilities() : {};
+    const attempts = [
+      { video: { facingMode: { ideal: facing } }, audio: false },
+      { video: { facingMode: facing }, audio: false },
+      { video: true, audio: false }
+    ];
+    let lastError = null;
+    stream = null;
+    for (const constraints of attempts){
+      try { stream = await navigator.mediaDevices.getUserMedia(constraints); break; }
+      catch (e){ lastError = e; }
+    }
+    if (!stream){
+      const name = lastError && lastError.name || "";
+      if (name === "NotAllowedError" || name === "PermissionDeniedError")
+        return "Permiso de cámara denegado. Habilita Cámara en Ajustes > Aplicaciones > esta APK > Permisos.";
+      if (name === "NotFoundError" || name === "DevicesNotFoundError")
+        return "Android no detectó una cámara disponible en el reloj.";
+      if (name === "NotReadableError" || name === "TrackStartError")
+        return "La cámara está ocupada o Android no pudo iniciarla. Cierra otras apps que la usen y vuelve a probar.";
+      return "No se pudo iniciar la cámara (" + (name || "error desconocido") + "). Revisa el permiso Cámara y la compatibilidad del WebView.";
+    }
+    try { // Enfoque continuo es opcional; algunos relojes no soportan getCapabilities.
+      const t = stream.getVideoTracks && stream.getVideoTracks()[0];
+      const caps = t && t.getCapabilities ? t.getCapabilities() : {};
       if (caps.focusMode && caps.focusMode.includes("continuous")) await t.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
     } catch (e) {}
-    const v = $("v"); v.srcObject = stream; await v.play().catch(() => {});
-    try { wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; }
+    const v = $("v");
+    v.muted = true; v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.autoplay = true;
+    v.srcObject = stream;
+    try { await v.play(); }
+    catch (e){
+      stream.getTracks().forEach(t => t.stop()); stream = null; v.srcObject = null;
+      return "La cámara abrió, pero el video no pudo reproducirse. Revisa permisos y WebView de Android.";
+    }
+    try { if (navigator.wakeLock && navigator.wakeLock.request) wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; }
     return "";
   }
   function closeCamera(){
